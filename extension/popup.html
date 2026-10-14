@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rana</title>
+<style>
+:root{--bg:#0F1220;--panel:color-mix(in srgb,#0F1220 80%,#8A4BF5);--line:color-mix(in srgb,#8A4BF5 25%,transparent);
+ --txt:#EEF1FB;--mid:#C9AAFF;--dim:#9AA3C2;--mint:#3DF0A0;--gold:#F0C442;--mono:Consolas,ui-monospace,monospace;--sans:'Segoe UI',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:300px;background:var(--bg);color:var(--txt);font:13px/1.5 var(--sans);padding:14px}
+h1{font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+h1 img{width:22px;height:22px}
+.st{font:600 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+.st .ok{color:var(--mint)}.st .warn{color:var(--gold)}
+.tip{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.tip .who{display:block;font:600 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+button{font:600 11px var(--sans);border:none;border-radius:999px;padding:6px 11px;cursor:pointer;background:var(--mint);color:var(--bg)}
+button.g{background:transparent;border:1px solid var(--line);color:var(--mid)}
+.links{display:flex;gap:6px;flex-wrap:wrap}
+.note{font-size:11px;color:var(--dim);margin-top:8px}
+[hidden]{display:none !important}
+</style>
+</head>
+<body>
+<h1><img src="icons/icon-32.png" alt="">Rana</h1>
+<div class="st" id="st">…</div>
+<div class="tip" id="tip" hidden>
+  <span class="who">from your dashboard</span>
+  <span id="tipText"></span>
+  <div class="acts" id="tipActs"></div>
+</div>
+<p class="note" id="noTip">No tip waiting. Rana asks your dashboard every few minutes while you are signed in.</p>
+<div class="links">
+  <button id="dash">Open my dashboard</button>
+  <button class="g" id="opts">Settings</button>
+  <button class="g" id="now" title="ask the dashboard now">Check now</button>
+</div>
+<p class="note" id="meta"></p>
+<script src="lib/common.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>

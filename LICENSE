@@ -1,0 +1,13 @@
+Copyright Exzellent, all rights reserved.
+
+This software and its source code are the property of Exzellent. No part of
+it may be copied, modified, distributed, sublicensed or used to make a
+derivative work without Exzellent's prior written permission, except that
+Exzellent grants you a personal, non-transferable licence to install and use
+the released builds (the desktop app and the browser extension) with your own
+Exzellent account.
+
+Third-party components (Electron, electron-builder, active-win and their
+dependencies) keep their own licences, found in their packages.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.

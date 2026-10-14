@@ -1,0 +1,78 @@
+{
+  "name": "rana",
+  "productName": "Rana",
+  "version": "0.1.0",
+  "description": "Rana — the Exzellent companion that lives on your desktop: guidance from your dashboard when the buddy there is minimized, local sensing with consent, nothing else leaves the machine.",
+  "type": "module",
+  "main": "src/main.js",
+  "private": true,
+  "license": "SEE LICENSE IN ../LICENSE",
+  "author": "Exzellent",
+  "homepage": "https://www.exzellent.co",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test",
+    "smoke": "electron . --smoke",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "active-win": "^8.2.1"
+  },
+  "devDependencies": {
+    "electron": "^31.3.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "co.exzellent.rana",
+    "productName": "Rana",
+    "artifactName": "Rana-${version}-${os}.${ext}",
+    "files": [
+      "src/**",
+      "renderer/**",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/active-win/**"
+    ],
+    "npmRebuild": false,
+    "directories": {
+      "buildResources": "build"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "deleteAppDataOnUninstall": false
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "category": "public.app-category.education",
+      "icon": "build/icon.png",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "EXZELLENT",
+      "repo": "rana-desktop",
+      "releaseType": "release"
+    }
+  }
+}

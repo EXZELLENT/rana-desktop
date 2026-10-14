@@ -1,0 +1,12 @@
+{
+  "name": "rana-desktop",
+  "version": "0.1.0",
+  "description": "Rana, the Exzellent companion: the desktop app (desktop/) and the Chrome extension (extension/).",
+  "private": true,
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE",
+  "scripts": {
+    "pack": "node scripts/pack-extension.mjs",
+    "icons": "node scripts/make-icons.mjs"
+  }
+}

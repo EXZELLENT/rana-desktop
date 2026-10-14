@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Rana by Exzellent",
+  "version": "0.1.0",
+  "description": "Rana, the Exzellent companion in your browser: tips from your dashboard when the buddy there is minimized, and a small friend on exzellent.co.",
+  "minimum_chrome_version": "120",
+  "permissions": ["storage", "alarms", "scripting"],
+  "host_permissions": ["https://exzellent-backend-1.onrender.com/*"],
+  "optional_host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://*.exzellent.co/*"],
+      "js": ["vendor/exzi-character.js", "lib/common.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "options.html",
+  "action": {
+    "default_title": "Rana",
+    "default_popup": "popup.html",
+    "default_icon": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+  },
+  "icons": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+}

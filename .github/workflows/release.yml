@@ -1,0 +1,58 @@
+name: Release
+
+# Pushing a tag v<version> (matching desktop/package.json and extension/manifest.json)
+# builds the unsigned installers on Windows and macOS, publishes them to the GitHub
+# Release for that tag (electron-builder --publish always), and attaches the zipped
+# extension. Download URLs: https://github.com/EXZELLENT/rana-desktop/releases/latest/download/<asset>
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  desktop:
+    name: Desktop (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Build and publish the installer
+        run: npm run dist -- --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # No code signing (see README): skip the identity lookup on macOS.
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+  extension:
+    name: Extension zip
+    needs: desktop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check the extension
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('extension/manifest.json','utf8'))"
+          for f in extension/*.js extension/lib/*.js; do node --check "$f"; done
+      - run: npm run pack
+      - name: Attach to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/rana-extension-*.zip

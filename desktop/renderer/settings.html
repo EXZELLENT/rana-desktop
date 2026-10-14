@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+<title>Rana — settings</title>
+<style>
+:root{--bg:#0F1220;--panel:color-mix(in srgb,#0F1220 80%,#8A4BF5);--line:color-mix(in srgb,#8A4BF5 25%,transparent);
+ --txt:#EEF1FB;--mid:#C9AAFF;--dim:#9AA3C2;--mint:#3DF0A0;--violet:#8A4BF5;--gold:#F0C442;--red:#DD0000;
+ --mono:'Consolas',ui-monospace,monospace;--sans:'Segoe UI',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);padding:22px;font-size:13.5px;line-height:1.55}
+h1{font-size:18px;margin-bottom:4px}
+.sub{color:var(--dim);font-size:12px;margin-bottom:18px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.box h2{font-size:13px;margin-bottom:10px;color:var(--mid);text-transform:uppercase;letter-spacing:.12em;font-family:var(--mono);font-weight:600}
+label.row{display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer}
+label.row span.d{color:var(--dim);font-size:11.5px;display:block}
+input[type=checkbox]{width:17px;height:17px;accent-color:var(--violet)}
+input[type=text],input[type=url]{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;color:var(--txt);font-size:13px}
+input[type=range]{width:100%;accent-color:var(--violet)}
+select{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;color:var(--txt);width:100%}
+.tl{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.btn{width:100%;border:none;border-radius:12px;padding:12px;font-weight:700;font-size:14px;cursor:pointer;background:linear-gradient(100deg,#8A4BF5,#5B21B6);color:#fff;margin-top:4px}
+.sm{width:auto;padding:8px 14px;font-size:12.5px;margin:0;border-radius:999px;background:var(--mint);color:var(--bg)}
+.sm.g{background:transparent;border:1px solid var(--line);color:var(--mid)}
+.note{font-size:11px;color:var(--dim);margin-top:10px}
+.ok{color:var(--mint)}
+.warn{color:var(--gold)}
+.code{font:700 26px var(--mono);letter-spacing:.14em;color:var(--gold);margin:8px 0;user-select:all}
+.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+details{margin-top:10px;color:var(--dim);font-size:12px}
+details input{margin-top:6px}
+[hidden]{display:none !important}
+</style>
+</head>
+<body>
+<h1>Rana — consent &amp; settings</h1>
+<p class="sub">Nothing is sensed until you allow it. What Rana senses stays on this computer; only a signed-in account talks to Exzellent, and only for the tips and the sign-in itself.</p>
+
+<div class="box" id="acct">
+  <h2>Account</h2>
+  <div id="aNone">
+    <p>Not connected. Connect to get tips from your Exzellent dashboard here, when the buddy there is minimized.</p>
+    <div class="acts"><button class="btn sm" id="aConnect">Connect to Exzellent</button></div>
+  </div>
+  <div id="aPending" hidden>
+    <p>Your code — approve it on your dashboard's Rana page:</p>
+    <div class="code" id="aCode">····-····</div>
+    <div class="acts">
+      <button class="btn sm" id="aOpen">Open exzellent.co to approve</button>
+      <button class="btn sm g" id="aCancel">Cancel</button>
+      <span class="note" style="margin:0">expires in <span id="aLeft">10:00</span></span>
+    </div>
+  </div>
+  <div id="aDone" hidden>
+    <p>Connected as <b id="aName">you</b>.</p>
+    <div class="acts"><button class="btn sm g" id="aDisc">Disconnect</button></div>
+  </div>
+  <p class="note" id="aMsg"></p>
+  <p class="note warn" id="aPlain" hidden>This computer cannot encrypt Rana's sign-in (no keychain available), so it is kept in memory only and lasts until Rana quits; nothing is written to disk unprotected.</p>
+  <label class="row"><input type="checkbox" id="tTips" checked>
+    <span><b>Show tips from my dashboard</b><span class="d">Rana asks the dashboard every few minutes and shows a tip only when the buddy there is minimized or you are elsewhere.</span></span></label>
+  <label class="row"><input type="checkbox" id="tAuto">
+    <span><b>Start Rana when I sign in to my computer</b><span class="d">Applies to the installed app; a development run only remembers the choice.</span></span></label>
+  <details><summary>Advanced: server</summary>
+    <input type="url" id="apiBase" placeholder="https://exzellent-backend-1.onrender.com">
+    <span class="d">Where sign-in and tips go. Leave it unless Exzellent told you otherwise; saved with the button below.</span>
+  </details>
+</div>
+
+<div class="box">
+  <h2>What may Rana see?</h2>
+  <label class="row"><input type="checkbox" id="cWin" checked>
+    <span><b>Active window (app name + title)</b><span class="d">How Rana knows your focus — e.g. "anatomy-ch4.pdf" or "Instagram". Titles are processed locally and never stored or sent.</span></span></label>
+  <label class="row"><input type="checkbox" id="cIdle" checked>
+    <span><b>Idle time</b><span class="d">So Rana naps when you're away and welcomes you back.</span></span></label>
+  <p class="note">Screen content (OCR / vision) is <b>not</b> part of this version — it would ship later as a separate, off-by-default switch.</p>
+</div>
+
+<div class="box">
+  <h2>Voice</h2>
+  <label style="display:block;margin-bottom:8px">What should Rana call you?</label>
+  <input type="text" id="pName" placeholder="e.g. Rio · master · dear">
+  <label style="display:block;margin:14px 0 6px">Persona</label>
+  <select id="pPersona">
+    <option value="study">🎒 Study Buddy</option>
+    <option value="mentor">🧭 Mentor</option>
+    <option value="clone">👩‍🏫 Clone of my tutor</option>
+    <option value="support">🫂 Gentle Support</option>
+  </select>
+  <input type="text" id="pClone" placeholder="Tutor's name (for the clone persona)" style="margin-top:8px;display:none">
+  <label style="display:block;margin:14px 0 2px">Tone</label>
+  <input type="range" id="pTone" min="0" max="100" value="45">
+  <div class="tl"><span>gentle &amp; soft</span><span>direct &amp; brief</span></div>
+</div>
+
+<div class="box">
+  <h2>Quiet hours</h2>
+  <label class="row"><input type="checkbox" id="qOn" checked>
+    <span><b>No proactive prompts or tips 23:45 – 07:00</b><span class="d">Except the wind-down nudge itself.</span></span></label>
+</div>
+
+<button class="btn" id="save">Save — Rana may begin</button>
+<p class="note" id="status"></p>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const api = window.rana;
+let expiryTimer = null;
+
+$("pPersona").addEventListener("change", () => { $("pClone").style.display = $("pPersona").value === "clone" ? "block" : "none"; });
+
+function fill(s) {
+  $("cWin").checked = s.consents.activeWindow; $("cIdle").checked = s.consents.idle;
+  $("pName").value = s.profile.name || ""; $("pTone").value = s.profile.tone ?? 45;
+  $("pPersona").value = s.profile.persona || "study"; $("pClone").value = s.profile.cloneName || "";
+  $("pClone").style.display = $("pPersona").value === "clone" ? "block" : "none";
+  $("qOn").checked = !(s.quiet && s.quiet.from === 0 && s.quiet.to === 0);
+  $("tTips").checked = s.tips !== false;
+  $("tAuto").checked = !!s.autostart;
+  $("apiBase").value = s.apiBase || "";
+  $("aPlain").hidden = s.tokensEncrypted !== false;
+  if (s.consented) $("status").innerHTML = '<span class="ok">✓ consent given — change anything anytime</span>';
+  if (s.account) renderAccount(s.account);
+}
+
+function renderAccount(a) {
+  const st = a || {};
+  $("aNone").hidden = !!(st.connected || st.pending);
+  $("aPending").hidden = !st.pending;
+  $("aDone").hidden = !st.connected;
+  clearInterval(expiryTimer);
+  if (st.pending) {
+    $("aCode").textContent = st.pending.userCode;
+    $("aOpen").dataset.url = st.pending.verifyUrl || "";
+    const tick = () => {
+      const left = Math.max(0, Math.round((st.pending.expiresAt - Date.now()) / 1000));
+      $("aLeft").textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
+    };
+    tick(); expiryTimer = setInterval(tick, 1000);
+  }
+  if (st.connected) $("aName").textContent = (st.user && (st.user.name || st.user.firstName)) || "you";
+  const msg = { expired: "The code expired — connect again for a new one.", denied: "That code was refused on the dashboard.", "signed-out": "Exzellent ended this session — connect again.", approved: "Connected. Tips will arrive in Rana's bubble.", disconnected: "Disconnected; this device is forgotten on the dashboard too.", cancelled: "" }[st.reason];
+  if (msg !== undefined) $("aMsg").textContent = msg;
+  $("aMsg").className = "note " + (st.reason === "approved" ? "ok" : st.reason && st.reason !== "cancelled" && st.reason !== "pending" ? "warn" : "");
+}
+
+api.getSettings().then(fill);
+api.onSettings(fill);
+api.onAccount(renderAccount);
+
+$("aConnect").onclick = async () => {
+  $("aConnect").disabled = true; $("aMsg").textContent = "Asking Exzellent for a code…"; $("aMsg").className = "note";
+  const r = await api.account.start();
+  $("aConnect").disabled = false;
+  if (!r.ok) { $("aMsg").textContent = r.error || "Could not reach Exzellent."; $("aMsg").className = "note warn"; }
+};
+$("aOpen").onclick = () => { if ($("aOpen").dataset.url) api.openExternal($("aOpen").dataset.url); };
+$("aCancel").onclick = () => api.account.cancel();
+$("aDisc").onclick = async () => { $("aDisc").disabled = true; renderAccount(await api.account.disconnect()); $("aDisc").disabled = false; };
+$("tTips").onchange = () => api.saveSettings({ tips: $("tTips").checked });
+$("tAuto").onchange = () => api.setAutostart($("tAuto").checked);
+
+$("save").onclick = () => {
+  api.saveSettings({
+    consented: true,
+    consents: { activeWindow: $("cWin").checked, idle: $("cIdle").checked },
+    profile: { name: $("pName").value.trim(), tone: Number($("pTone").value), persona: $("pPersona").value, cloneName: $("pClone").value.trim() },
+    quiet: $("qOn").checked ? { from: 23.75, to: 7 } : { from: 0, to: 0 },
+    tips: $("tTips").checked,
+    apiBase: $("apiBase").value.trim(),
+  });
+  $("status").innerHTML = '<span class="ok">✓ saved — Rana is watching only what you allowed</span>';
+};
+</script>
+</body>
+</html>

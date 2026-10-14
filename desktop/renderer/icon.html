@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rana icon</title>
+<style>
+html,body{margin:0;background:transparent}
+#stage{position:absolute;left:-2000px;top:0;width:320px}
+#out{font:11px monospace;white-space:pre-wrap;word-break:break-all}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<pre id="out"></pre>
+<script src="vendor/exzi-character.js"></script>
+<script>
+/* Rana's face as PNG data URLs, drawn by the character bundle.
+ *   window.renderRanaIcon([256, 32]) → { "256": "data:image/png;base64,…", "32": … }
+ * Electron calls it from a hidden window (src/icon.js); scripts/make-icons.mjs loads
+ * this page in headless Chrome with ?sizes=16,32,… and reads #out from --dump-dom. */
+(function () {
+  var EC = window.ExziCharacter;
+  var FALLBACK_SPEC = {
+    meta: { id: "rana", name: "Rana", species: "elephant" },
+    colours: { skin: "grey", earInner: "rose", accent: "gold" },
+    features: { tusks: false, tuft: false, nameTag: false },
+    scarf: "none",
+  };
+  function spec() { return EC.RANA_SPEC || FALLBACK_SPEC; }
+  // A square around the head and shoulders: the bust view, widened to a square about its centre.
+  function squareBox(views) {
+    var b = views.bust || views.full;
+    var s = Math.max(b[2], b[3]);
+    return [b[0] + b[2] / 2 - s / 2, b[1] + b[3] / 2 - s / 2, s, s];
+  }
+  function loadImage(src) {
+    return new Promise(function (res, rej) { var i = new Image(); i.onload = function () { res(i); }; i.onerror = function () { rej(new Error("svg image failed to load")); }; i.src = src; });
+  }
+  window.renderRanaIcon = async function (sizes) {
+    var host = document.getElementById("stage");
+    host.innerHTML = "";
+    var c = EC.createCharacter(host, { spec: spec(), view: "full", interactive: false, autoplay: false, motion: "reduced", sound: false, bubble: false });
+    c.setMood("happy");
+    for (var i = 0; i < 40; i++) c.tick(16); // let the pose settle into "happy" (no blink falls in this window)
+    var svg = c.svg.cloneNode(true);
+    var box = squareBox(c.rig.geom.views);
+    svg.setAttribute("viewBox", box.map(function (n) { return Math.round(n * 100) / 100; }).join(" "));
+    svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    svg.setAttribute("width", "512");
+    svg.setAttribute("height", "512");
+    var xml = new XMLSerializer().serializeToString(svg);
+    var img = await loadImage("data:image/svg+xml;charset=utf-8," + encodeURIComponent(xml));
+    var out = {};
+    for (var k = 0; k < sizes.length; k++) {
+      var s = Number(sizes[k]);
+      var cv = document.createElement("canvas");
+      cv.width = s; cv.height = s;
+      var ctx = cv.getContext("2d");
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, 0, 0, s, s);
+      out[String(s)] = cv.toDataURL("image/png");
+    }
+    c.destroy();
+    return out;
+  };
+  // The markers are assembled here so the literal never appears in this source (which --dump-dom prints too).
+  var OK = ["RANA", "ICONS"].join("-"), ERR = ["RANA", "ERROR"].join("-");
+  var m = /[?&]sizes=([\d,]+)/.exec(location.search);
+  if (m) {
+    renderRanaIcon(m[1].split(",").filter(Boolean).map(Number)).then(
+      function (o) { document.getElementById("out").textContent = OK + " " + JSON.stringify(o); },
+      function (e) { document.getElementById("out").textContent = ERR + " " + (e && e.message || e); }
+    );
+  }
+})();
+</script>
+</body>
+</html>
