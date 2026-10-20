@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Rana by Exzellent",
   "version": "0.1.1",
-  "description": "Rana, the Exzellent companion in your browser: tips from your dashboard when the buddy there is minimized, and a small friend on exzellent.co.",
+  "description": "Rana, the Exzellent companion: tips from your own dashboard (next lesson, homework, streak) while the buddy there is minimized.",
   "minimum_chrome_version": "120",
   "permissions": ["storage", "alarms", "scripting"],
   "host_permissions": ["https://exzellent-backend-1.onrender.com/*"],

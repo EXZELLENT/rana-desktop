@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rana small promo tile</title>
+<style>
+:root{--navy:#0F1220;--violet:#8A4BF5;--lav:#C9AAFF;--mist:#EEF1FB;--dim:#9AA3C2;--gold:#F0C442;--mint:#3DF0A0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:440px;height:280px;overflow:hidden}
+body{background:
+  radial-gradient(circle at 26% 58%, color-mix(in srgb,var(--violet) 42%,transparent) 0, transparent 46%),
+  radial-gradient(circle at 92% 8%, color-mix(in srgb,var(--mint) 14%,transparent) 0, transparent 38%),
+  var(--navy);
+  color:var(--mist);font-family:'Segoe UI',Inter,system-ui,sans-serif;position:relative}
+#rana{position:absolute;left:18px;top:30px;width:190px}
+#rana svg{display:block}
+.copy{position:absolute;left:214px;top:70px;right:22px}
+.eyebrow{font:600 10px Consolas,ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+h1{font-size:50px;line-height:1;font-weight:700;letter-spacing:-.01em}
+p{margin-top:12px;font-size:15px;line-height:1.35;color:color-mix(in srgb,var(--mist) 82%,var(--dim))}
+.pill{display:inline-block;margin-top:14px;font:600 11px 'Segoe UI',system-ui,sans-serif;color:var(--navy);background:var(--mint);border-radius:999px;padding:5px 11px}
+</style>
+</head>
+<body>
+<div id="rana"></div>
+<div class="copy">
+  <div class="eyebrow">by Exzellent</div>
+  <h1>Rana</h1>
+  <p>Tips from your dashboard, right where you are.</p>
+  <span class="pill">Consent first</span>
+</div>
+<script src="../../../extension/vendor/exzi-character.js"></script>
+<script src="../../../extension/lib/common.js"></script>
+<script>
+(function () {
+  var EC = window.ExziCharacter;
+  var c = EC.createCharacter(document.getElementById("rana"), { spec: EC.RANA_SPEC || RANA.FALLBACK_SPEC, view: "full", interactive: false, autoplay: false, motion: "reduced", sound: false, bubble: false });
+  c.setMood("happy");
+  for (var i = 0; i < 40; i++) c.tick(16);
+  window.__shotReady = true;
+})();
+</script>
+</body>
+</html>

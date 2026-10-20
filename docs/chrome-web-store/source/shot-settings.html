@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rana popup and settings</title>
+<style>
+/* Screenshots 2 and 3 (1280 x 800): the extension's real popup.html and options.html,
+ * unchanged, in frames, with chrome-stub.js answering for the service worker.
+ *   ?state=connected  the popup with a waiting tip, the settings connected
+ *   ?state=pending    connecting with a code: the settings show it, the popup waits */
+:root{--navy:#0F1220;--violet:#8A4BF5;--lav:#C9AAFF;--mist:#EEF1FB;--dim:#9AA3C2;--gold:#F0C442;--mint:#3DF0A0;
+ --chrome:color-mix(in srgb,#0F1220 70%,#454E71);--chrome2:color-mix(in srgb,#0F1220 84%,#454E71);--line:color-mix(in srgb,#8A4BF5 30%,transparent)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1280px;height:800px;overflow:hidden}
+body{background:
+  radial-gradient(circle at 12% 18%, color-mix(in srgb,var(--violet) 34%,transparent) 0, transparent 40%),
+  radial-gradient(circle at 90% 96%, color-mix(in srgb,var(--mint) 12%,transparent) 0, transparent 36%),
+  color-mix(in srgb,var(--navy) 92%,#454E71);
+  color:var(--mist);font-family:'Segoe UI',Inter,system-ui,sans-serif;position:relative}
+.copy{position:absolute;left:56px;top:64px;width:540px}
+.eyebrow{font:600 11px Consolas,ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+h1{font-size:34px;line-height:1.12;font-weight:700;margin-bottom:18px}
+ol,ul{list-style:none}
+.copy li{position:relative;padding-left:26px;margin-bottom:13px;font-size:15px;line-height:1.4;color:color-mix(in srgb,var(--mist) 86%,var(--dim))}
+.copy li::before{content:"";position:absolute;left:2px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--mint)}
+.copy ol li{counter-increment:n}
+.copy ol li::before{content:counter(n);width:18px;height:18px;left:-2px;top:1px;font:700 11px/18px 'Segoe UI',sans-serif;text-align:center;color:var(--navy)}
+/* the options page, in a browser window */
+.win{position:absolute;left:640px;top:24px;width:600px;height:752px;border-radius:12px;overflow:hidden;background:var(--navy);border:1px solid var(--line);box-shadow:0 30px 80px color-mix(in srgb,#000000 45%,transparent)}
+.win .bar{height:40px;background:var(--chrome);display:flex;align-items:center;gap:10px;padding:0 12px}
+.win .dots{display:flex;gap:7px}
+.win .dots i{width:11px;height:11px;border-radius:50%;background:color-mix(in srgb,var(--dim) 45%,transparent)}
+.win .url{flex:1;height:26px;border-radius:999px;background:var(--chrome2);display:flex;align-items:center;gap:8px;padding:0 12px;font-size:12px;color:var(--dim)}
+.win .url b{font-weight:600;color:var(--mist);background:color-mix(in srgb,var(--violet) 30%,transparent);border-radius:6px;padding:1px 7px;font-size:11px}
+.win .view{width:600px;height:712px;overflow:hidden}
+.win iframe{display:block;width:600px;height:712px;border:0;transform-origin:0 0}
+/* the popup, under its toolbar icon */
+.pop{position:absolute;left:140px;top:330px;width:300px}
+.pop .icon{position:absolute;right:12px;top:-46px;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--violet) 28%,transparent);border:1px solid var(--line)}
+.pop .icon img{width:22px;height:22px}
+.pop .icon em{position:absolute;right:-4px;bottom:-4px;min-width:16px;height:16px;border-radius:8px;background:var(--violet);color:#FFFFFF;font:700 10px/16px 'Segoe UI',sans-serif;font-style:normal;text-align:center;padding:0 3px}
+.pop .frame{border-radius:12px;overflow:hidden;border:1px solid var(--line);box-shadow:0 26px 70px color-mix(in srgb,#000000 55%,transparent);background:var(--navy)}
+.pop iframe{display:block;width:300px;border:0}
+</style>
+</head>
+<body>
+<div class="copy" id="copy"></div>
+<div class="pop">
+  <div class="icon"><img src="../../../extension/icons/icon-32.png" alt=""><em id="badge">1</em></div>
+  <div class="frame"><iframe id="popup" src="../../../extension/popup.html" scrolling="no"></iframe></div>
+</div>
+<div class="win">
+  <div class="bar"><div class="dots"><i></i><i></i><i></i></div><div class="url"><b>Rana by Exzellent</b>Settings</div></div>
+  <div class="view"><iframe id="options" src="../../../extension/options.html" scrolling="no"></iframe></div>
+</div>
+<script>
+(function () {
+  var pending = /[?&]state=pending/.test(location.search);
+  document.getElementById("copy").innerHTML = pending
+    ? '<div class="eyebrow">Connect, no password</div><h1>Sign in with a code</h1><ol>'
+      + '<li>In Rana’s settings, choose Connect to Exzellent.</li>'
+      + '<li>Approve the code on your dashboard’s Rana page, where you see which device is asking.</li>'
+      + '<li>Disconnect here or on the dashboard at any time.</li></ol>'
+    : '<div class="eyebrow">Rana by Exzellent</div><h1>One tip at a time, on your terms</h1><ul>'
+      + '<li>Okay, Later or Not this: every tip asks you.</li>'
+      + '<li>Tips on or off, and quiet hours at night.</li>'
+      + '<li>Only on exzellent.co until you turn on “Rana everywhere”.</li></ul>';
+  if (pending) document.getElementById("badge").remove();
+  // Size the popup's frame to its page, as Chrome sizes a popup.
+  var pop = document.getElementById("popup");
+  pop.addEventListener("load", function () {
+    setTimeout(function () { pop.style.height = pop.contentDocument.documentElement.scrollHeight + "px"; }, 400);
+  });
+  // Show the whole settings page in the window: scaled down a little if it is taller than the view.
+  var opt = document.getElementById("options");
+  opt.addEventListener("load", function () {
+    setTimeout(function () {
+      var h = opt.contentDocument.documentElement.scrollHeight, k = Math.min(1, 712 / h);
+      opt.style.width = 600 / k + "px"; opt.style.height = h + "px"; opt.style.transform = "scale(" + k + ")";
+    }, 400);
+  });
+  setTimeout(function () { window.__shotReady = true; }, 1600);
+})();
+</script>
+</body>
+</html>

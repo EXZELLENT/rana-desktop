@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rana store icon</title>
+<style>
+/* 128 x 128, transparent; the artwork is 96 x 96 with 16 px of padding, as the Web Store asks. */
+html,body{margin:0;width:128px;height:128px;background:transparent;overflow:hidden}
+#stage{position:absolute;left:-2000px;top:0;width:320px}
+#face{position:absolute;left:16px;top:16px;width:96px;height:96px}
+#face svg{display:block;width:96px !important;height:96px !important}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="face"></div>
+<script src="../../../extension/vendor/exzi-character.js"></script>
+<script src="../../../extension/lib/common.js"></script>
+<script>
+/* Rana's face as the extension's own icons have it (desktop/renderer/icon.html):
+ * the bundle's RANA_SPEC, "happy", the bust widened to a square. */
+(function () {
+  var EC = window.ExziCharacter;
+  var c = EC.createCharacter(document.getElementById("stage"), { spec: EC.RANA_SPEC || RANA.FALLBACK_SPEC, view: "full", interactive: false, autoplay: false, motion: "reduced", sound: false, bubble: false });
+  c.setMood("happy");
+  for (var i = 0; i < 40; i++) c.tick(16);
+  var b = c.rig.geom.views.bust || c.rig.geom.views.full;
+  var s = Math.max(b[2], b[3]);
+  var svg = c.svg.cloneNode(true);
+  svg.setAttribute("viewBox", [b[0] + b[2] / 2 - s / 2, b[1] + b[3] / 2 - s / 2, s, s].map(function (n) { return Math.round(n * 100) / 100; }).join(" "));
+  svg.removeAttribute("width"); svg.removeAttribute("height");
+  svg.style.overflow = "hidden"; // the full view draws outside its box; an icon is clipped to it
+  document.getElementById("face").appendChild(svg);
+  window.__shotReady = true;
+})();
+</script>
+</body>
+</html>
