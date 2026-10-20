@@ -6,7 +6,7 @@
   const $ = (id) => document.getElementById(id);
   const root = $("root"), host = $("char"), bub = $("bub"), chip = $("chip");
   const EC = window.ExziCharacter;
-  // Until the bundle ships RANA_SPEC (a sibling stream adds the mouse species), Rana is a grey, tuskless elephant.
+  // The bundle's RANA_SPEC (the mouse) draws Rana; this spec stands in only for an older bundle without it.
   const FALLBACK_SPEC = {
     meta: { id: "rana", name: "Rana", species: "elephant" },
     colours: { skin: "grey", earInner: "rose", accent: "gold" },

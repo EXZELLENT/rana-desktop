@@ -11,7 +11,7 @@ globalThis.RANA = (() => {
   const KIND_COOLDOWN = 8 * MIN;
   const LATER_MS = 30 * MIN;
   const NEVER_MS = 24 * 60 * MIN;
-  // Until the bundle ships RANA_SPEC (a sibling stream adds the mouse species), Rana is a grey, tuskless elephant.
+  // The bundle's RANA_SPEC (the mouse) draws Rana; this spec stands in only for an older bundle without it.
   const FALLBACK_SPEC = {
     meta: { id: "rana", name: "Rana", species: "elephant" },
     colours: { skin: "grey", earInner: "rose", accent: "gold" },

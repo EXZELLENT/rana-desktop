@@ -1,9 +1,15 @@
 name: Release
 
 # Pushing a tag v<version> (matching desktop/package.json and extension/manifest.json)
-# builds the unsigned installers on Windows and macOS, publishes them to the GitHub
-# Release for that tag (electron-builder --publish always), and attaches the zipped
-# extension. Download URLs: https://github.com/EXZELLENT/rana-desktop/releases/latest/download/<asset>
+# builds the unsigned installers on Windows and macOS and the extension zip, attaches
+# them to the GitHub Release for that tag and then publishes the release as the latest.
+# The asset names carry no version, so the dashboard's links always find the newest:
+#   https://github.com/EXZELLENT/rana-desktop/releases/latest/download/Rana-win.exe
+#   https://github.com/EXZELLENT/rana-desktop/releases/latest/download/Rana-mac.dmg
+#   https://github.com/EXZELLENT/rana-desktop/releases/latest/download/rana-extension.zip
+# Next to them: latest.yml, latest-mac.yml and the .blockmap files electron-updater reads.
+# The release stays a draft while the jobs upload, so "latest" never points at a release
+# with missing files; the last job publishes it.
 on:
   push:
     tags: ["v*"]
@@ -11,17 +17,60 @@ on:
 permissions:
   contents: write
 
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_REPO: ${{ github.repository }}
+  TAG: ${{ github.ref_name }}
+
 jobs:
+  release:
+    name: Draft the release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: The tag matches both versions
+        run: |
+          want="${TAG#v}"
+          desk=$(node -p "require('./desktop/package.json').version")
+          ext=$(node -p "require('./extension/manifest.json').version")
+          echo "tag $TAG, desktop $desk, extension $ext"
+          if [ "$desk" != "$want" ] || [ "$ext" != "$want" ]; then
+            echo "::error::tag $TAG does not match desktop/package.json ($desk) and extension/manifest.json ($ext)"
+            exit 1
+          fi
+      - name: Create the draft (or reuse the release of this tag)
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "release $TAG exists"
+            exit 0
+          fi
+          {
+            echo "Rana ${TAG#v}, the Exzellent companion."
+            echo
+            echo "- Windows: Rana-win.exe (x64, a one-click installer for the current user)"
+            echo "- macOS: Rana-mac.dmg (universal: Intel and Apple Silicon)"
+            echo "- Chrome: rana-extension.zip (unzip it, open chrome://extensions, switch on Developer mode, Load unpacked)"
+            echo
+            echo "The builds are not code-signed yet, so Windows and macOS warn once; the README says how to open them."
+          } > notes.md
+          gh release create "$TAG" --draft --verify-tag --title "Rana ${TAG#v}" --notes-file notes.md
+
   desktop:
     name: Desktop (${{ matrix.os }})
+    needs: release
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        include:
+          - os: windows-latest
+            files: dist/Rana-win.exe dist/Rana-win.exe.blockmap dist/latest.yml
+          - os: macos-latest
+            files: dist/Rana-mac.dmg dist/Rana-mac.dmg.blockmap dist/latest-mac.yml
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: desktop
+        shell: bash
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,16 +80,23 @@ jobs:
           cache-dependency-path: desktop/package-lock.json
       - run: npm ci
       - run: npm test
-      - name: Build and publish the installer
-        run: npm run dist -- --publish always
+      - name: Build the installer
+        # Built here and uploaded by gh below, so the release holds exactly these names.
+        run: npm run dist -- --publish never
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # No code signing (see README): skip the identity lookup on macOS.
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      - name: Attach to the release
+        run: |
+          ls -l dist
+          for f in ${{ matrix.files }}; do
+            [ -f "$f" ] || { echo "::error::$f was not built"; exit 1; }
+          done
+          gh release upload "$TAG" ${{ matrix.files }} --clobber
 
   extension:
     name: Extension zip
-    needs: desktop
+    needs: release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,8 +107,22 @@ jobs:
         run: |
           node -e "JSON.parse(require('fs').readFileSync('extension/manifest.json','utf8'))"
           for f in extension/*.js extension/lib/*.js; do node --check "$f"; done
+      - run: npm test
       - run: npm run pack
       - name: Attach to the release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/rana-extension-*.zip
+        run: gh release upload "$TAG" dist/rana-extension.zip --clobber
+
+  publish:
+    name: Publish the release
+    needs: [desktop, extension]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every file is attached
+        run: |
+          have=$(gh release view "$TAG" --json assets --jq '.assets[].name')
+          echo "$have"
+          for f in Rana-win.exe Rana-win.exe.blockmap latest.yml Rana-mac.dmg Rana-mac.dmg.blockmap latest-mac.yml rana-extension.zip; do
+            echo "$have" | grep -qx "$f" || { echo "::error::$f is missing from the release"; exit 1; }
+          done
+      - name: Publish it as the latest release
+        run: gh release edit "$TAG" --draft=false --latest

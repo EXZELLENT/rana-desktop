@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 /**
- * Zips extension/ into dist/rana-extension-<version>.zip (the version from
- * manifest.json), ready for "Load unpacked" after unzipping or for the Web Store.
+ * Zips extension/ into dist/rana-extension.zip, ready for "Load unpacked" after
+ * unzipping or for the Web Store. The name carries no version, so the dashboard's
+ * releases/latest/download/rana-extension.zip link always finds the newest one
+ * (the version is inside, in manifest.json).
  * No dependency: a small zip writer here, deflate from node:zlib.
  *
  * Usage: node scripts/pack-extension.mjs   (npm run pack)
@@ -15,7 +17,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const src = join(root, "extension");
 const manifest = JSON.parse(readFileSync(join(src, "manifest.json"), "utf8"));
 const outDir = join(root, "dist");
-const out = join(outDir, `rana-extension-${manifest.version}.zip`);
+const out = join(outDir, "rana-extension.zip");
 
 function walk(dir, base = dir, list = []) {
   for (const name of readdirSync(dir).sort()) {
@@ -79,5 +81,5 @@ if (!entries.some((e) => e.name === "manifest.json")) throw new Error("extension
 mkdirSync(outDir, { recursive: true });
 const bytes = zip(entries);
 writeFileSync(out, bytes);
-console.log(`[pack] ${relative(root, out)}: ${entries.length} files, ${bytes.length} bytes`);
+console.log(`[pack] ${relative(root, out)}: version ${manifest.version}, ${entries.length} files, ${bytes.length} bytes`);
 for (const e of entries) console.log(`[pack]   ${e.name}`);

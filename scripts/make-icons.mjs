@@ -60,8 +60,16 @@ function renderWithChrome(chrome, sizes) {
     if (!text.startsWith("RANA-ICONS ")) throw new Error(`no icons in the dumped DOM (chrome exit ${r.status}; #out: ${JSON.stringify(text.slice(0, 120))}; ${String(r.stderr).slice(0, 300)})`);
     return JSON.parse(text.slice("RANA-ICONS ".length));
   } finally {
-    rmSync(profile, { recursive: true, force: true });
+    removeProfile(profile);
   }
+}
+
+/** Chrome can hold its profile a moment after it exits: wait about a second, remove it, retry once. */
+function removeProfile(dir) {
+  const pause = () => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1000);
+  pause();
+  try { rmSync(dir, { recursive: true, force: true }); }
+  catch (_e) { pause(); rmSync(dir, { recursive: true, force: true }); }
 }
 
 /* ── the no-Chrome fallback: a grey disc with a gold ring, as a minimal PNG ── */

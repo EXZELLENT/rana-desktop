@@ -47,6 +47,7 @@
           ]
         }
       ],
+      "artifactName": "Rana-win.${ext}",
       "icon": "build/icon.png"
     },
     "nsis": {
@@ -63,6 +64,8 @@
           ]
         }
       ],
+      "artifactName": "Rana-mac.${ext}",
+      "x64ArchFiles": "Contents/Resources/app.asar.unpacked/node_modules/active-win/**",
       "category": "public.app-category.education",
       "icon": "build/icon.png",
       "hardenedRuntime": false,

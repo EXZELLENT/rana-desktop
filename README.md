@@ -19,10 +19,9 @@ the dashboard; Rana is the one who taps you on the shoulder when you are elsewhe
   feedback and the sign-out, all to the Exzellent backend, and only after you connected her.
 
 The desktop app and the extension are drawn by the same character engine as the dashboard's buddy
-(`exzi-character.js`, a build of the main site repo's `src/shared/exzi-character/`). The vendored build
-predates `RANA_SPEC` (the mouse species is being added on the site's `feat/exzi-dashboard-buddy` branch),
-so until it is refreshed Rana is drawn as a grey, tuskless elephant from a fallback spec; both apps switch
-to `ExziCharacter.RANA_SPEC` by themselves once the bundle has it.
+(`exzi-character.js`, a build of the main site repo's `src/shared/exzi-character/`), as the bundle's
+`RANA_SPEC`: the mouse. Should an older bundle without that spec ever be vendored, both apps fall back
+to a grey, tuskless elephant spec of their own rather than fail.
 
 ## Install
 
@@ -30,26 +29,28 @@ Builds are **not code-signed** (no Apple Developer ID, no Windows certificate ye
 once. The download URLs are
 
 ```
-https://github.com/EXZELLENT/rana-desktop/releases/latest/download/Rana-<version>-win.exe
-https://github.com/EXZELLENT/rana-desktop/releases/latest/download/Rana-<version>-mac.dmg
-https://github.com/EXZELLENT/rana-desktop/releases/latest/download/rana-extension-<version>.zip
+https://github.com/EXZELLENT/rana-desktop/releases/latest/download/Rana-win.exe
+https://github.com/EXZELLENT/rana-desktop/releases/latest/download/Rana-mac.dmg
+https://github.com/EXZELLENT/rana-desktop/releases/latest/download/rana-extension.zip
 ```
 
-for example `Rana-0.1.0-win.exe`, `Rana-0.1.0-mac.dmg`, `rana-extension-0.1.0.zip` (the version is in
-`desktop/package.json` and `extension/manifest.json`, and the release tag is `v<version>`).
+the same links the student dashboard offers. The names carry no version, so they always reach the newest
+release (the version is in `desktop/package.json` and `extension/manifest.json`, and the release tag is
+`v<version>`); keep them unchanged, or the dashboard's download buttons break. Every release is listed at
+https://github.com/EXZELLENT/rana-desktop/releases.
 
-**Windows.** Run `Rana-<version>-win.exe`. SmartScreen says "Windows protected your PC": click
+**Windows.** Run `Rana-win.exe`. SmartScreen says "Windows protected your PC": click
 *More info*, then *Run anyway*. The installer is a one-click NSIS setup for the current user; Rana
 starts afterwards and sits in the tray.
 
-**macOS.** Open `Rana-<version>-mac.dmg` and drag Rana to Applications. The first launch is blocked
+**macOS.** Open `Rana-mac.dmg` and drag Rana to Applications. The first launch is blocked
 ("cannot be opened because the developer cannot be verified"): right-click (or Control-click) Rana in
 Applications and choose *Open*, then *Open* again in the dialog; or allow it under *System Settings →
 Privacy & Security → Open Anyway*. To read window titles macOS needs **Screen Recording** permission
 (*Privacy & Security → Screen Recording*): until it is granted Rana simply senses nothing. The dmg is a
 **universal** build (one download, native on both Intel and Apple Silicon Macs, no Rosetta).
 
-**Chrome.** Until the extension is on the Web Store: download `rana-extension-<version>.zip`, unzip it,
+**Chrome.** Until the extension is on the Web Store: download `rana-extension.zip`, unzip it,
 open `chrome://extensions`, switch on *Developer mode*, click *Load unpacked* and pick the unzipped
 folder (or pick `extension/` from a checkout of this repo). Pin Rana to the toolbar to see her badge.
 
@@ -119,7 +120,8 @@ npm run dist         # unsigned installers into desktop/dist (electron-builder)
 ```
 
 ```
-npm run pack         # at the root: zips extension/ to dist/rana-extension-<version>.zip (no dependency)
+npm test             # at the root: node --test "test/*.test.mjs" — the extension's service worker against a stand-in chrome.* and fetch
+npm run pack         # at the root: zips extension/ to dist/rana-extension.zip (no dependency)
 npm run icons        # re-renders the icons with the character bundle in headless Chrome (see below)
 ```
 
@@ -129,21 +131,23 @@ a change (`chrome://extensions` → ↻). The service worker's log is under *Ins
 **The character bundle** `exzi-character.js` is a build of the main site repo's
 `src/shared/exzi-character/` (the site publishes it as `public/site-assets/exzi/exzi-character.js`),
 copied unchanged into `desktop/renderer/vendor/` and `extension/vendor/` (the two copies must stay
-identical: `cmp` them). The vendored build is the one the site's feature worktrees shared on
-2026-10-13 (exzi-phase3, exzi-phase4, ai-archive, buddy-pages, podcast-voice, revert), sha256
-`d9b51794f0adbda34509402ebbb8bed79c80132d2deb2505f5532c9f82415910` (57345 bytes, `SPECIES` = elephant
-only, no `RANA_SPEC`); it is not on `main` (whose published copy is an older, 57332-byte build) and the
-site's `feat/hero-player-v4` branch does not carry the published file at all. To refresh: copy the
-site's new build over both vendor copies, run
-`npm run icons` at the root (the extension icons, `desktop/build/icon.png` and `src/icon-fallback.json`
-then show the current species), delete a cached `rana-icon-256.png` from the app's user data folder
-while testing, and update the hash and source commit here. The API used is `createCharacter(host,
+identical: `cmp` them). The vendored build is the one committed on the site's `feat/exzi-dashboard-buddy`
+branch at `a0915b725977f4c02a64cd47126408c77a708c1a` (2026-10-20, "Exzi redrawn from the owner's art: the
+blue elephant, with volume"), sha256 `3d1a740d7cf8d55a0e3eaa62c44dbc760cbcf19cd89f3d160bfd4c2830057cf8`
+(73324 bytes, `SPECIES` = elephant and mouse, with `RANA_SPEC` the mouse, and Exzi the
+elephant redrawn from the owner's art). The copy published on the site's `main`
+is an older build without `RANA_SPEC` until that branch merges, so take the bundle from the branch (or
+from `main` afterwards). To refresh: copy the site's new build over both vendor copies, run `npm run icons`
+at the root (the extension icons, `desktop/build/icon.png` and `src/icon-fallback.json` then show the
+current build) and update the hash and source commit here; the desktop app re-renders its cached tray icon
+by itself, because the cache file's name carries the bundle's hash. The API used is `createCharacter(host,
 { spec, view, interactive, bubble, sound })`, `setMood`, `play`, `start`/`pause`, `destroy`, and
-`RANA_SPEC` when the bundle has it.
+`RANA_SPEC` (the fallback spec stands in only when a bundle lacks it).
 
 **Icons.** `desktop/renderer/icon.html` renders Rana with the bundle and returns PNG data URLs.
 The desktop app runs it once in a hidden window at first start and caches the 256 px result in
-its user data folder (`rana-icon-256.png`; tray and app icon), falling back to the small PNG in
+its user data folder (`rana-icon-256-<bundle sha256, 12 hex>.png`; tray and app icon; a refreshed
+bundle gets a new file and the other cached faces are removed), falling back to the small PNG in
 `desktop/src/icon-fallback.json` until then. `scripts/make-icons.mjs` runs the same page in headless
 Chrome (its own throw-away profile under the temp folder) to write `extension/icons/icon-{16,32,48,128}.png`,
 `desktop/build/icon.png` (512 px, from which electron-builder makes the `.ico` and `.icns`) and the
@@ -152,6 +156,7 @@ fallback JSON. Without Chrome it writes plain grey discs.
 ### Verifying
 
 - `desktop`: `npm test` green; `npm run smoke` prints `rana: smoke ok (…)` and exits 0.
+- The root: `npm test` green (the service worker: device poll, 429 slow-down, guidance arming, quiet hours).
 - `node --check` on every `.js`/`.mjs`/`.cjs`; `node -e "JSON.parse(fs.readFileSync('extension/manifest.json'))"`.
 - The extension: load it unpacked, open `https://www.exzellent.co/student-dashboard`, minimize the
   dashboard buddy and Rana appears bottom-right.
@@ -160,18 +165,27 @@ fallback JSON. Without Chrome it writes plain grey discs.
 
 1. Bump the version in `desktop/package.json` and `extension/manifest.json` (keep them equal).
 2. Commit, tag `v<version>`, push the tag.
-3. `.github/workflows/release.yml` builds on `windows-latest` and `macos-latest` (`npm ci`, `npm test`,
-   `npm run dist -- --publish always` with `GH_TOKEN`), which creates the GitHub Release for the tag and
-   uploads `Rana-<version>-win.exe` (x64 NSIS) and `Rana-<version>-mac.dmg` (a universal dmg: the
-   `mac.target` arch is `universal`, so the arm64 runner builds x64 and arm64 and merges them with
-   `@electron/universal`; a bare `dmg` target would silently build the runner's own arm64 only); a third
-   job zips the extension and attaches `rana-extension-<version>.zip`. The release is published (not a
-   draft), so the `releases/latest/download/…` URLs above work as soon as the jobs finish.
+3. `.github/workflows/release.yml` first checks that the tag matches both versions and creates the
+   GitHub Release for the tag as a draft. Then, in parallel, it builds on `windows-latest` and
+   `macos-latest` (`npm ci`, `npm test`, `npm run dist -- --publish never`) and uploads with `gh release
+   upload`: `Rana-win.exe` (x64 NSIS; `win.artifactName`) with `Rana-win.exe.blockmap` and `latest.yml`,
+   and `Rana-mac.dmg` (`mac.artifactName`; a universal dmg: the `mac.target` arch is `universal`, so the
+   arm64 runner builds x64 and arm64 and merges them with `@electron/universal`; a bare `dmg` target
+   would silently build the runner's own arm64 only) with `Rana-mac.dmg.blockmap` and `latest-mac.yml`.
+   A third job checks and tests the extension (`node --check`, the root's `npm test`), zips it and
+   attaches `rana-extension.zip`. The last job checks that all seven files are there and publishes the
+   release as the latest (not a draft), so the `releases/latest/download/…` URLs above switch to the new
+   version only once every file is up. `latest.yml` and `latest-mac.yml` name the same files, so
+   electron-updater can read them should the app ever update itself (on macOS that would also need a
+   `zip` target: Squirrel.Mac installs from a zip, not a dmg).
 
 `active-win` ships prebuilt binaries for every target (a universal Swift helper for macOS, napi `.node`
 files for darwin x64/arm64 and win32 x64), so `npmRebuild` is off (nothing to compile, and both
 architectures' trees stay identical for the universal merge) and `node_modules/active-win/**` is
-`asarUnpack`ed so the macOS helper can be executed from `app.asar.unpacked`.
+`asarUnpack`ed so the macOS helper can be executed from `app.asar.unpacked`. Those Mach-O files are
+the same in the x64 and the arm64 tree (the helper is already universal, and each `.node` is for one
+architecture by name), so `mac.x64ArchFiles` lets `@electron/universal` copy them instead of failing
+on them.
 
 No code signing: `CSC_IDENTITY_AUTO_DISCOVERY=false` on macOS and no certificate on Windows. When
 Exzellent has an Apple Developer ID and a Windows certificate, add them as the usual electron-builder
@@ -215,6 +229,9 @@ extension/
   lib/common.js      shared constants and pure helpers (quiet hours, the gate, safe URLs)
 scripts/
   make-icons.mjs     icons from the bundle via headless Chrome; pack-extension.mjs: the zip
+test/
+  extension-background.test.mjs  node --test at the root: background.js in a vm context with a stand-in
+                     chrome.* and fetch (device poll and 429, guidance arming, quiet hours, backoff)
 .github/workflows/release.yml
 ```
 
