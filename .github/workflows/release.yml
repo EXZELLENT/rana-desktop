@@ -25,9 +25,9 @@ env:
 jobs:
   release:
     name: Draft the release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: The tag matches both versions
         run: |
           want="${TAG#v}"
@@ -72,8 +72,8 @@ jobs:
         working-directory: desktop
         shell: bash
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -97,10 +97,10 @@ jobs:
   extension:
     name: Extension zip
     needs: release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - name: Check the extension
@@ -115,7 +115,7 @@ jobs:
   publish:
     name: Publish the release
     needs: [desktop, extension]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Every file is attached
         run: |

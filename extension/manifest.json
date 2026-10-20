@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Rana by Exzellent",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Rana, the Exzellent companion in your browser: tips from your dashboard when the buddy there is minimized, and a small friend on exzellent.co.",
   "minimum_chrome_version": "120",
   "permissions": ["storage", "alarms", "scripting"],

@@ -131,14 +131,14 @@ a change (`chrome://extensions` → ↻). The service worker's log is under *Ins
 **The character bundle** `exzi-character.js` is a build of the main site repo's
 `src/shared/exzi-character/` (the site publishes it as `public/site-assets/exzi/exzi-character.js`),
 copied unchanged into `desktop/renderer/vendor/` and `extension/vendor/` (the two copies must stay
-identical: `cmp` them). The vendored build is the one committed on the site's `feat/exzi-dashboard-buddy`
-branch at `a0915b725977f4c02a64cd47126408c77a708c1a` (2026-10-20, "Exzi redrawn from the owner's art: the
-blue elephant, with volume"), sha256 `3d1a740d7cf8d55a0e3eaa62c44dbc760cbcf19cd89f3d160bfd4c2830057cf8`
-(73324 bytes, `SPECIES` = elephant and mouse, with `RANA_SPEC` the mouse, and Exzi the
-elephant redrawn from the owner's art). The copy published on the site's `main`
-is an older build without `RANA_SPEC` until that branch merges, so take the bundle from the branch (or
-from `main` afterwards). To refresh: copy the site's new build over both vendor copies, run `npm run icons`
-at the root (the extension icons, `desktop/build/icon.png` and `src/icon-fallback.json` then show the
+identical: `cmp` them). The vendored build is the one published on the site's `main` at
+`c6dc3fde9853c7fd7bfdf43c7b35b2ada64dc763` (2026-10-20, the merge of PR #223, after PR #222: the review
+round that redrew Exzi's body and face and tidied Rana's tail), sha256
+`cd60cdab64b467e405f3750df85adf3a45480345ee3008dfe236f7fec1c5eb42` (77741 bytes, `SPECIES` = elephant and
+mouse, with `RANA_SPEC` the mouse). Release 0.1.0 carried the earlier build from the site's
+`feat/exzi-dashboard-buddy` branch at `a0915b7` (sha256 `3d1a740d…`, 73324 bytes). Take the bundle from the
+site's `main` (`git show origin/main:public/site-assets/exzi/exzi-character.js`). To refresh: copy the
+site's new build over both vendor copies, run `npm run icons` at the root (the extension icons, `desktop/build/icon.png` and `src/icon-fallback.json` then show the
 current build) and update the hash and source commit here; the desktop app re-renders its cached tray icon
 by itself, because the cache file's name carries the bundle's hash. The API used is `createCharacter(host,
 { spec, view, interactive, bubble, sound })`, `setMood`, `play`, `start`/`pause`, `destroy`, and
@@ -163,10 +163,12 @@ fallback JSON. Without Chrome it writes plain grey discs.
 
 ## Release
 
-1. Bump the version in `desktop/package.json` and `extension/manifest.json` (keep them equal).
-2. Commit, tag `v<version>`, push the tag.
+1. Bump the version in `desktop/package.json` (and its `package-lock.json`), `extension/manifest.json`
+   and the root `package.json` (keep them equal), and add the version to `CHANGELOG.md`.
+2. Commit, tag `v<version>` (annotated), push the tag.
 3. `.github/workflows/release.yml` first checks that the tag matches both versions and creates the
-   GitHub Release for the tag as a draft. Then, in parallel, it builds on `windows-latest` and
+   GitHub Release for the tag as a draft (on `ubuntu-26.04`; `actions/checkout@v7` and
+   `actions/setup-node@v7`, which run on Node 24). Then, in parallel, it builds on `windows-latest` and
    `macos-latest` (`npm ci`, `npm test`, `npm run dist -- --publish never`) and uploads with `gh release
    upload`: `Rana-win.exe` (x64 NSIS; `win.artifactName`) with `Rana-win.exe.blockmap` and `latest.yml`,
    and `Rana-mac.dmg` (`mac.artifactName`; a universal dmg: the `mac.target` arch is `universal`, so the
@@ -233,6 +235,7 @@ test/
   extension-background.test.mjs  node --test at the root: background.js in a vm context with a stand-in
                      chrome.* and fetch (device poll and 429, guidance arming, quiet hours, backoff)
 .github/workflows/release.yml
+CHANGELOG.md         what each release changed
 ```
 
 The bubble rule on the desktop: the SignalEngine's local prompts and the backend's tips share one

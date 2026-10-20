@@ -1,7 +1,7 @@
 {
   "name": "rana",
   "productName": "Rana",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Rana — the Exzellent companion that lives on your desktop: guidance from your dashboard when the buddy there is minimized, local sensing with consent, nothing else leaves the machine.",
   "type": "module",
   "main": "src/main.js",
